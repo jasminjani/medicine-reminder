@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>registration</title>
+  <style>
+    :root {
+      --light-blue: #27a2e9;
+      --brown: #e7e7e7;
+      --blue: #0969da;
+      --white: #ffffff;
+      --black: black;
+      --darkblue: darkblue;
+      --red: red;
+      --light-red: rgb(255, 128, 128);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .section {
+      width: 100%;
+      margin: 0 auto;
+      margin-top: 60PX;
+    }
+
+    .h1 {
+      display: flex;
+      justify-content: center;
+      margin-top: 80px;
+    }
+
+    .outer-div {
+      display: flex;
+      justify-content: space-around;
+      margin: 25px;
+    }
+
+    .input {
+      height: 35px;
+      width: 300px;
+      border-radius: 5px;
+    }
+
+    .register-btn {
+      margin-top: 60px;
+    }
+
+    .btn {
+      height: 40px;
+      width: 180px;
+      border-radius: 3px;
+      background-color: var(--light-blue);
+      padding-top: 10px;
+      cursor: pointer;
+      text-align: center;
+      margin: auto;
+    }
+
+    .btn:hover {
+      color: var(--white);
+      background-color: var(--blue);
+    }
+
+    .p {
+      margin-bottom: 13px;
+    }
+
+    .login-btn {
+      margin-top: 17px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="h1">
+      <h1>Registaration</h1>
+    </div>
+    <div class="section">
+      <form id="form">
+
+        <div class="outer-div">
+          <div class="sub-div">
+            <p class="p"><label for="first_name">First name : </label></p>
+            <input type="text" class="input validateInput" name="first_name" id="first_name" tabindex="1"
+              placeholder="      First name">
+          </div>
+
+          <div class="sub-div">
+            <p class="p"><label for="last_name">Last name : </label></p>
+            <input type="text" class="input validateInput" name="last_name" id="last_name" tabindex="2"
+              placeholder="      last name">
+          </div>
+        </div>
+
+        <div class="outer-div">
+          <div class="sub-div">
+            <p class="p"><label for="email">email : </label></p>
+            <input type="text" class="input validateInput" name="email" id="email" tabindex="3"
+              placeholder="      email">
+          </div>
+
+          <div class="sub-div">
+            <p class="p"><label for="blood_group">Blood Group : </label></p>
+            <input type="text" class="input" name="blood_group" id="blood_group" tabindex="4"
+              placeholder="      blood group in capital letters">
+          </div>
+        </div>
+
+        <div class="outer-div">
+          <div class="sub-div">
+            <p class="p"><label for="phone_no">contact : </label></p>
+            <input type="text" class="input validateInput" name="phone_no" id="phone_no" tabindex="5"
+              placeholder="      contact no.">
+          </div>
+
+          <div class="sub-div">
+            <p class="p"><label for="dob">DOB : </label></p>
+            <input type="date" class="input validateInput" name="dob" id="dob" tabindex="6" placeholder="      DOB">
+          </div>
+        </div>
+
+        <div class="register-btn">
+          <p class="btn p" id="register" tabindex="7">Register</p>
+        </div>
+        <div class="login-btn">
+          <p class="p" id="loginBtn">Already have an Account? <a href="/login" tabindex="8">login</a></p>
+          <p class="p" style="display: none;" id="activateAccount"> Go to email and activate account.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+
+<script>
+
+  let register = document.getElementById('register');
+
+
+
+  // ====== VALIDATION =======
+
+
+  function validate() {
+    let isvalid = true;
+
+    let validateInput = document.querySelectorAll(".validateInput");
+
+    let validated = document.querySelectorAll(".validated");
+
+    // remove if any error message is in frontend
+    if (validated?.length) {
+      validated.forEach((item) => {
+        item.remove();
+      });
+    }
+
+    // empty fields and email and phone number validation
+    validateInput.forEach((field) => {
+      if (field.value.trim() === "") {
+        let p = document.createElement("p");
+        field.insertAdjacentElement("afterend", p);
+        p.innerHTML = "*required";
+        p.classList.add("validated");
+        p.style.color = "red";
+        p.style.margin = "0";
+        p.style.fontSize = "12px";
+        isvalid = false;
+      }
+
+      if (field.name == "email" && field.value.trim() !== "") {
+        const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        if (!field.value.match(emailRegex)) {
+          let p = document.createElement("p");
+          field.insertAdjacentElement("afterend", p);
+          p.innerHTML = "Invalid Email syntax";
+          p.classList.add("validated");
+          p.style.color = "red";
+          p.style.margin = "0";
+          p.style.fontSize = "12px";
+          isvalid = false;
+        }
+      }
+
+
+      if (
+        field.name == "phone_no" &&
+        field.value.trim() !== "" &&
+        (field.value.trim().length !== 10 ||
+        isNaN(field.value) == true) 
+      ) {
+        let p = document.createElement("p");
+        field.insertAdjacentElement("afterend", p);
+        p.innerHTML = "mobile number should be 10 digit integer";
+        p.classList.add("validated");
+        p.style.color = "red";
+        p.style.margin = "0";
+        p.style.fontSize = "12px";
+        isvalid = false;
+      }
+
+      // date of birth validation
+      if (field.name == "dob" && field.value.trim() !== "") {
+        if (isNaN(new Date(field.value))) {
+          let p = document.createElement("p");
+          field.insertAdjacentElement("afterend", p);
+          // year.parentElement.parentElement.insertAdjacentElement("afterend", p);
+          p.innerHTML = "*Invalid Date";
+          p.classList.add("validated");
+          p.style.color = "red";
+          p.style.margin = "0";
+          p.style.fontSize = "12px";
+          isvalid = false;
+        }
+      }
+    });
+
+    // ===== blood group validation =====
+    if (document.getElementById('blood_group').name == "blood_group" && document.getElementById('blood_group').value.trim() !== "") {
+      const bloodRegex = /^(A|B|AB|O)[+-]$/;
+      if (!document.getElementById('blood_group').value.match(bloodRegex)) {
+        let p = document.createElement("p");
+        document.getElementById('blood_group').insertAdjacentElement("afterend", p);
+        p.innerHTML = "Invalid blood group";
+        p.classList.add("validated");
+        p.style.color = "red";
+        p.style.margin = "0";
+        p.style.fontSize = "12px";
+        isvalid = false;
+      }
+    }
+
+
+    return isvalid;
+  }
+
+  register.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (validate()) {
+
+      // async function register() {
+      try {
+
+        // option -1 get value of particular field and append in formData
+        // let formData = new FormData();
+
+        // let first_name = document.getElementById('first_name').value;
+        // let last_name = document.getElementById('last_name').value;
+        // let email = document.getElementById('email').value;
+        // let blood_group = document.getElementById('blood_group').value;
+        // let phone_no = document.getElementById('phone_no').value;
+        // let dob = document.getElementById('dob').value;
+
+        // formData.append("first_name", first_name)
+        // formData.append("last_name", last_name)
+        // formData.append("email", email)
+        // formData.append("blood_group", blood_group)
+        // formData.append("phone_no", phone_no)
+        // formData.append("dob", dob)
+        // console.log(formData);
+
+
+        // optiion - 2 get value of all form together from form tag and give this value to FormData
+        const form = document.getElementById('form');
+        const formData = new URLSearchParams(new FormData(form));
+
+        let data = await fetch('/add-user', {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          method: 'post',
+          body: formData
+        })
+
+        data = await data.json();
+        console.log(data);
+
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('activateAccount').style.display = 'block';
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  });
+
+
+
+</script>
+
+</html>

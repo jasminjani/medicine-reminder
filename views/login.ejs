@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    :root {
+      --light-blue: #27a2e9;
+      --brown: #e7e7e7;
+      --blue: #0969da;
+      --white: #ffffff;
+      --black: black;
+      --darkblue: darkblue;
+      --red: red;
+      --light-red: rgb(255, 128, 128);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .forgot-pass {
+      display: flex;
+      justify-content: center;
+      padding-left: 190px;
+    }
+
+    a {
+      text-decoration: none;
+      color: rgb(114, 114, 114);
+    }
+
+    .h1 {
+      display: flex;
+      justify-content: center;
+      margin-top: 80px;
+    }
+
+    .section {
+      width: 100%;
+      margin: 0 auto;
+      margin-top: 60PX;
+    }
+
+    .outer-div {
+      display: flex;
+      justify-content: center;
+      margin: 25px;
+    }
+
+    .input {
+      height: 35px;
+      width: 300px;
+      border-radius: 5px;
+    }
+
+    .login-btn {
+      margin-top: 10px;
+    }
+
+    .btn {
+      height: 40px;
+      width: 180px;
+      border-radius: 3px;
+      background-color: var(--light-blue);
+      padding-top: 10px;
+      cursor: pointer;
+      text-align: center;
+      margin: auto;
+    }
+
+    .btn:hover {
+      color: var(--white);
+      background-color: var(--blue);
+    }
+
+    .p {
+      margin-bottom: 13px;
+    }
+
+    .registration-btn {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .registration-btn a {
+      color: var(--darkblue);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="h1">
+      <h1>Login</h1>
+    </div>
+
+    <div class="section">
+      <form action="" id="form">
+
+        <div class="outer-div">
+          <div class="sub-div">
+            <p class="p"><label for="email">Email : </label></p>
+            <input type="text" class="input validateInput" name="email" id="email" tabindex="1" placeholder="   email">
+          </div>
+        </div>
+
+        <div class="outer-div">
+          <div class="sub-div">
+            <p class="p"><label for="password">Password : </label></p>
+            <input type="password" class="input validateInput" name="password" id="password" tabindex="2"
+              placeholder="   password">
+          </div>
+        </div>
+
+        <div class="forgot-pass">
+          <p class="p" tabindex="4">
+            <a href="/forgot-password" id="forgot-password">Forgot Password?</a>
+          </p>
+        </div>
+
+        <div class="login-btn">
+          <p class="btn p" id="login" tabindex="3">Login</p>
+        </div>
+
+        <div class="registration-btn">
+          <p class="p">Create New Account? <a href="/registration" tabindex="5">Register</a></p>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</body>
+
+<script>
+
+  function validateLogin() {
+    try {
+
+      let isvalid = true;
+
+      let validateInput = document.querySelectorAll(".validateInput");
+
+      let validated = document.querySelectorAll(".validated");
+
+      // remove if any error message is in frontend
+      if (validated?.length) {
+        validated.forEach((item) => {
+          item.remove();
+        });
+      }
+
+      // empty fields and email and phone number validation
+      validateInput.forEach((field) => {
+        if (field.value.trim() === "") {
+          let p = document.createElement("p");
+          field.insertAdjacentElement("afterend", p);
+          p.innerHTML = "*required";
+          p.classList.add("validated");
+          p.style.color = "red";
+          p.style.margin = "0";
+          p.style.fontSize = "12px";
+          isvalid = false;
+        }
+
+        if (field.name == "email" && field.value.trim() !== "") {
+          const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+          if (!field.value.match(emailRegex)) {
+            let p = document.createElement("p");
+            field.insertAdjacentElement("afterend", p);
+            p.innerHTML = "Invalid Email syntax";
+            p.classList.add("validated");
+            p.style.color = "red";
+            p.style.margin = "0";
+            p.style.fontSize = "12px";
+            isvalid = false;
+          }
+        }
+      });
+
+      return isvalid;
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  let login = document.getElementById('login');
+
+  login.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (validateLogin()) {
+      const form = document.getElementById('form');
+      const formData = new URLSearchParams(new FormData(form));
+
+      let data = await fetch('/login', {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        method: 'post',
+        body: formData
+      })
+
+      data = await data.json();
+
+      if (data.success) {
+        window.location.href = `/dashboard`;
+      }
+      else {
+        let p = document.createElement("p");
+        document.getElementById('password').insertAdjacentElement("afterend", p);
+        p.innerHTML = `${data.message}`;
+        p.classList.add("validated");
+        p.style.color = "red";
+        p.style.margin = "0";
+        p.style.fontSize = "12px";
+      }
+    }
+  });
+
+</script>
+
+</html>
