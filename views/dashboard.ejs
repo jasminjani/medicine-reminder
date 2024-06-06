@@ -4,19 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>dashboard</title>
+  <title>Dashboard</title>
   <style>
-    :root {
-      --light-blue: #27a2e9;
-      --brown: #e7e7e7;
-      --blue: #0969da;
-      --white: #ffffff;
-      --black: black;
-      --darkblue: darkblue;
-      --red: red;
-      --light-red: rgb(255, 128, 128);
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -34,53 +23,18 @@
       margin: 0 auto;
       margin-top: 30PX;
       /* border: 2px solid blue; */
-    }
-
-    .h1 {
-      display: flex;
-      justify-content: center;
-      margin-top: 50px;
-    }
-
-    .outer-div {
       display: flex;
       justify-content: space-around;
-      margin: 25px;
     }
 
-    .input {
-      height: 35px;
-      width: 300px;
-      border-radius: 5px;
-    }
-
-    .p {
-      margin-bottom: 13px;
-    }
-
-    .textarea {
-      width: 500px;
-      border-radius: 5px;
-    }
-
-    .add-medicine-btn {
-      margin-top: 60px;
-    }
-
-    .btn {
-      height: 40px;
-      width: 180px;
-      border-radius: 3px;
-      background-color: var(--light-blue);
-      padding-top: 10px;
+    .add-medicine {
       cursor: pointer;
-      text-align: center;
-      margin: auto;
+      margin: 10px auto;
     }
 
-    .btn:hover {
-      color: var(--white);
-      background-color: var(--blue);
+    .logout {
+      cursor: pointer;
+      margin: 10px auto;
     }
   </style>
 </head>
@@ -88,52 +42,18 @@
 <body>
 
   <div class="container">
-    <div class="h1">
-      <h1>One time only</h1>
-    </div>
     <div class="section">
-      <form id="form">
+      <div class="medicine">
+        <p class="add-medicine" onclick="window.location.href=`/one-time`">One time</p>
+        <p class="add-medicine" onclick="window.location.href=`/recurring-daily`">Recurring daily</p>
+        <p class="add-medicine" onclick="window.location.href=`/recurring-weekly`">Recurring weekly</p>
+      </div>
 
-        <div class="outer-div">
-          <div class="sub-div">
-            <p class="p"><label for="name">medicine name : </label></p>
-            <input type="text" class="input validateInput" name="name" id="name" tabindex="1"
-              placeholder="      medicine name">
-          </div>
-
-          <div class="sub-div">
-            <p class="p"><label for="medication_timing">medicine schedule : </label></p>
-            <input type="text" class="input" name="medication_timing" id="medication_timing" tabindex="2"
-              placeholder="      eg. before lunch">
-          </div>
-        </div>
-
-        <div class="outer-div">
-          <div class="sub-div">
-            <p class="p"><label for="date">Date : </label></p>
-            <input type="date" class="input validateInput" name="date" id="date" tabindex="3"
-              placeholder="      medicine date">
-          </div>
-
-          <div class="sub-div">
-            <p class="p"><label for="time">Time : </label></p>
-            <input type="time" class="input validateInput" name="time" id="time" tabindex="4"
-              placeholder="      medicine date">
-          </div>
-        </div>
-
-        <div class="outer-div">
-          <div class="sub-div">
-            <p class="p"><label for="description">Description : </label></p>
-            <textarea class="textarea" name="description" id="description" tabindex="5" cols="30" rows="10"></textarea>
-          </div>
-        </div>
-
-        <div class="add-medicine-btn">
-          <p class="btn p" id="addMedicine" tabindex="6">Add Medicine</p>
-        </div>
-
-      </form>
+      <div>
+        <p class="logout" onclick="logout(event,'Logout')">Logout</p>
+        <p class="logout" onclick="logout(event,'LogoutAll')">Logout from all divices</p>
+        <p class="logout" onclick="logout(event,'LogoutAllOther')">Logout from other devices</p>
+      </div>
     </div>
   </div>
 
@@ -141,65 +61,36 @@
 
 <script>
 
-  function validate() {
-    try {
-
-      let isvalid = true;
-
-      let validateInput = document.querySelectorAll(".validateInput");
-
-      let validated = document.querySelectorAll(".validated");
-
-      // remove if any error message is in frontend
-      if (validated?.length) {
-        validated.forEach((item) => {
-          item.remove();
-        });
-      }
-
-      // empty fields and email and phone number validation
-      validateInput.forEach((field) => {
-        if (field.value.trim() === "") {
-          let p = document.createElement("p");
-          field.insertAdjacentElement("afterend", p);
-          p.innerHTML = "*required";
-          p.classList.add("validated");
-          p.style.color = "red";
-          p.style.margin = "0";
-          p.style.fontSize = "12px";
-          isvalid = false;
-        }
-      });
-
-      return isvalid;
-
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  let addMedicine = document.getElementById('addMedicine')
-
-  addMedicine.addEventListener("click", async (e) => {
+  async function logout(e, LogoutValue) {
     e.preventDefault();
 
-    if (validate()) {
-      const form = document.getElementById('form');
-      const formData = new URLSearchParams(new FormData(form));
+    let url;
 
-      let data = await fetch('/add-one-medicine', {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        method: 'post',
-        body: formData
-      })
-
-      data = await data.json();
-      console.log("one time medicine added");
-
+    if (LogoutValue == 'Logout') {
+      url = "/logout";
     }
-  });
+    else if (LogoutValue == 'LogoutAll') {
+      url = "/logout-all";
+    }
+    else if (LogoutValue == 'LogoutAllOther') {
+      url = "/logout-all-other";
+    }
+
+    let data = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
+    data = await data.json();
+
+    console.log(data.message);
+
+    if (data.success && (LogoutValue == 'Logout' || LogoutValue == 'LogoutAll')) {
+      window.location = "/login"
+    }
+  }
 
 </script>
 

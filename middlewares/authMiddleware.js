@@ -5,8 +5,8 @@ require("dotenv").config();
 // getToken function for passport
 const getToken = (req) => {
   return (
-    req.cookies.token ||
-    req.body.token ||
+    req.cookies?.token ||
+    req.body?.token ||
     req.header("Authorization")?.replace("Bearer ", "") ||
     null
   );
@@ -16,16 +16,25 @@ const getToken = (req) => {
 let opts = {
   jwtFromRequest: getToken,
   secretOrKey: process.env.JWT_SECRET,
+  passReqToCallback: true
 };
 
 // passport-jwt configuration logic
 exports.passportConfig = (passport) => {
   passport.use(
-    new jwtStrategy(opts, async (payload, next) => {
+    new jwtStrategy(opts, async (req, payload, next) => {
       let result;
       let id = payload.id;
+
+      req.token = getToken(req);
+      const session = await db.user_sessions.findOne({ where: { jwt_token: req.token }, raw: true })
+
+      if (!session) {
+        return next(null, false)
+      }
+
       try {
-        [result] = await db.users.findAll({ where: { id: id } });
+        result = await db.users.findAll({ where: { id: id }, raw: true });
       } catch (error) {
         // if any error during query execution
         logger.error(error)

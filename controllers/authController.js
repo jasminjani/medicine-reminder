@@ -1,10 +1,11 @@
-const transporter = require("../jash/nodemailer");
+const transporter = require("../utils/nodemailer");
 const db = require("../models");
 // const randomize = require('randomatic');
 const cookieParser = require("cookie-parser");
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { Op } = require("sequelize");
 
 exports.getRegistrationPage = (req, res) => {
   try {
@@ -71,7 +72,7 @@ exports.newActivationMail = async (req, res) => {
     // A string containing a randomly generated, 36 character long v4 UUID.
     const new_activation_code = crypto.randomUUID();
 
-    const userData = await db.users.findAll({ where: { activation: activation } });
+    const userData = await db.users.findAll({ where: { activation_code: activation } });
     const email = userData[0].email;
 
     const mailOptions = {
@@ -92,7 +93,7 @@ exports.newActivationMail = async (req, res) => {
 
     const updateUserActivation = await db.users.update({ activation_code: new_activation_code }, { where: { email: email } });
 
-    res.status(200).json({ updateUserActivation })
+    res.status(200).send("mail sent successfully");
 
   } catch (error) {
     console.log(error);
@@ -276,6 +277,22 @@ exports.login = async (req, res) => {
       // set token into userObj
       newObj.token = token;
 
+
+      // if db password and user's password matched then put the entry in user sessiond with jwt token
+      try {
+
+        await db.user_sessions.create({ u_id: result[0].id, jwt_token: token, ip_address: req.ip });
+
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          error: error.message,
+          message: "Internal Server Error",
+        });
+      }
+
+
+
       return res
         .cookie("token", token, {
           maxAge: 4 * 24 * 60 * 60 * 1000,
@@ -330,6 +347,48 @@ exports.logout = async (req, res) => {
   }
 };
 
+
+
+exports.logoutAllDevices = async (req, res) => {
+  try {
+
+    res.clearCookie("token");
+    await db.user_sessions.destroy({ where: { u_id: req.user.id } });
+
+    return res.status(200).json({
+      success: true,
+      message: "All user Logged out successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+
+
+exports.logoutAllOtherDevices = async (req, res) => {
+  try {
+
+
+    await db.user_sessions.destroy({ where: { [Op.and]: [{ u_id: req.user.id }, { [Op.ne]: { jwt_token: req.token } }] } });
+    console.log("log out from all devices");
+
+    return res.status(200).json({
+      success: true,
+      message: "All other user Logged out successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
 
 
 exports.getCurrentUser = async (req, res) => {

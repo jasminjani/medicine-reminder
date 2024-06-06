@@ -1,11 +1,7 @@
-const { addUser, getRegistrationPage, getLoginPage, getPasswordPage, addPassword, newActivationMail, login, logout, getCurrentUser } = require('../controllers/authController');
+const { addUser, getRegistrationPage, getLoginPage, getPasswordPage, addPassword, newActivationMail, login, logout, getCurrentUser, logoutAllDevices, logoutAllOtherDevices } = require('../controllers/authController');
 const passport = require("passport");
-const { getDashboard, addOneMedicine, cronjobOneMedicine } = require('../controllers/userController');
 const router = require('express').Router();
 
-// router.use(
-//   passport.authenticate("jwt", { session: false, failureRedirect: "/login" })
-// );
 
 // registration page add user
 router.route('/registration').get(getRegistrationPage);
@@ -19,29 +15,16 @@ router.route('/password/:activation').get(getPasswordPage);
 router.route('/add-password/:activation').post(addPassword);
 
 // for get new activation mail after old one expires
-router.route('/newActivationMail/:activation').post(newActivationMail);
+router.route('/newActivationMail/:activation').get(newActivationMail);
 
 
-// router.route("/current-user").get(getCurrentUser);
+// router.route("/current-user").get(passport.authenticate("jwt", { session: false, failureRedirect: "/login" }), getCurrentUser);
 
-router.route("/logout").post(logout);
+router.route("/logout").post(passport.authenticate("jwt", { session: false, failureRedirect: "/login" }), logout);
 
+router.route('/logout-all').post(passport.authenticate("jwt", { session: false, failureRedirect: '/login' }), logoutAllDevices);
 
-
-
-// ===== USER CONTROLLER =====
-
-router.route('/dashboard').get(getDashboard);
-router.route('/add-one-medicine').post(addOneMedicine);
-
-
-router.route('/cronjob').get(cronjobOneMedicine);
-
-
-
-router.use("*", (req, res) => {
-  return res.send('page not found')
-});
+router.route('/logout-all-other').post(passport.authenticate('jwt', { session: false, failureRedirect: '/login' }), logoutAllOtherDevices)
 
 
 module.exports = router;
