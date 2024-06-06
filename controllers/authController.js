@@ -13,7 +13,7 @@ exports.getRegistrationPage = (req, res) => {
     res.status(200).render('registration');
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).json({
       success: false,
       message: error.message
@@ -28,7 +28,7 @@ exports.getLoginPage = (req, res) => {
     res.status(200).render('login');
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).json({
       success: false,
       message: error.message
@@ -54,7 +54,7 @@ exports.getPasswordPage = async (req, res) => {
     res.status(200).render('password')
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).json({
       success: false,
       message: error.message
@@ -96,8 +96,11 @@ exports.newActivationMail = async (req, res) => {
     res.status(200).send("mail sent successfully");
 
   } catch (error) {
-    console.log(error);
-    res.status(500).send(error.message);
+    console.error(error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message
+    });
   }
 }
 
@@ -125,7 +128,6 @@ exports.addUser = async (req, res) => {
       });
     }
 
-    console.log(req.body);
 
     // if user not alredy exist
 
@@ -154,7 +156,7 @@ exports.addUser = async (req, res) => {
     res.status(200).json({ newUser });
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -201,7 +203,7 @@ exports.addPassword = async (req, res) => {
     res.status(200).json({ updateUser })
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -323,7 +325,7 @@ exports.login = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -339,7 +341,7 @@ exports.logout = async (req, res) => {
       message: "user Logged out successfully",
     });
   } catch (error) {
-    logger.error(error.message);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -352,6 +354,13 @@ exports.logout = async (req, res) => {
 exports.logoutAllDevices = async (req, res) => {
   try {
 
+    if (!req.user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: user not found',
+      });
+    }
+
     res.clearCookie("token");
     await db.user_sessions.destroy({ where: { u_id: req.user.id } });
 
@@ -360,7 +369,7 @@ exports.logoutAllDevices = async (req, res) => {
       message: "All user Logged out successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -373,8 +382,14 @@ exports.logoutAllDevices = async (req, res) => {
 exports.logoutAllOtherDevices = async (req, res) => {
   try {
 
+    if (!req.user || !req.token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: user or token not found',
+      });
+    }
 
-    await db.user_sessions.destroy({ where: { [Op.and]: [{ u_id: req.user.id }, { [Op.ne]: { jwt_token: req.token } }] } });
+    await db.user_sessions.destroy({ where: { [Op.and]: [{ u_id: req.user.id }, { jwt_token: { [Op.ne]: req.token } }] } });
     console.log("log out from all other devices");
 
     return res.status(200).json({
@@ -382,7 +397,7 @@ exports.logoutAllOtherDevices = async (req, res) => {
       message: "All other user Logged out successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error('Error logging out from other devices: ',error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -398,7 +413,7 @@ exports.getCurrentUser = async (req, res) => {
       user: req.user,
     });
   } catch (error) {
-    logger.error(error.message);
+     console.error(error);
     res.status(500).json({
       success: false,
       message: error.message,
