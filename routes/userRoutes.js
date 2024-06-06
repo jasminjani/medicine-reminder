@@ -1,5 +1,5 @@
 const passport = require("passport");
-const { getDashboard, addOneMedicine, recurringDailyPage, addRecurringDaily, cronejob, recurringWeeklyPage, addRecurringWeekly, emailMarkAsDone, getOneTimePage } = require("../controllers/userController");
+const { getDashboard, addOneMedicine, recurringDailyPage, addRecurringDaily, recurringWeeklyPage, addRecurringWeekly, emailMarkAsDone, getOneTimePage } = require("../controllers/userController");
 const router = require('express').Router();
 
 router.use(
@@ -22,6 +22,5 @@ router.route('/add-recurring-weekly').post(addRecurringWeekly);
 
 router.route('/mark-done/:id').get(emailMarkAsDone);
 
-router.route('/cronjob').get(cronejob)
 
 module.exports = router;

@@ -375,7 +375,7 @@ exports.logoutAllOtherDevices = async (req, res) => {
 
 
     await db.user_sessions.destroy({ where: { [Op.and]: [{ u_id: req.user.id }, { [Op.ne]: { jwt_token: req.token } }] } });
-    console.log("log out from all devices");
+    console.log("log out from all other devices");
 
     return res.status(200).json({
       success: true,
