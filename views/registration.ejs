@@ -140,7 +140,6 @@
         </div>
         <div class="login-btn">
           <p class="p" id="loginBtn">Already have an Account? <a href="/login" tabindex="8">login</a></p>
-          <p class="p" style="display: none;" id="activateAccount"> Go to email and activate account.</p>
         </div>
       </form>
     </div>
@@ -203,7 +202,7 @@
         field.name == "phone_no" &&
         field.value.trim() !== "" &&
         (field.value.trim().length !== 10 ||
-        isNaN(field.value) == true) 
+          isNaN(field.value) == true)
       ) {
         let p = document.createElement("p");
         field.insertAdjacentElement("afterend", p);
@@ -292,8 +291,10 @@
         data = await data.json();
         console.log(data);
 
-        document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('activateAccount').style.display = 'block';
+        if (data.success) {
+          window.location.href = `/login`;
+        }
+
 
       } catch (error) {
         console.log(error);

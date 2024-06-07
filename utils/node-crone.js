@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const db = require('../models');
 const { Op } = require("sequelize");
-const transporter = require("../utils/nodemailer");
+const { sentEmail } = require('../helpers/email');
 require('dotenv').config();
 
 
@@ -27,21 +27,16 @@ cron.schedule('* * * * *', async () => {
 
         const medicineLog = await db.medicine_logs.create({ medicine_id: element.id, log_date: new Date(), log_time: currTime });
 
-        const mailOptions = {
-          from: process.env.your_email,
-          to: user.email,
-          subject: "Reminder for medicine",
-          html: `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${element.name}</strong> medicine <strong>${element.medication_timing}</strong>. because it's <strong>${element.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`
-        }
+        const emailHtml = `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${element.name}</strong> medicine <strong>${element.medication_timing}</strong>. because it's <strong>${element.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`;
 
-        await transporter.sendMail(mailOptions);
+        await sentEmail(user.email, "Reminder for medicine", emailHtml);
 
       }
     });
 
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 
 });
@@ -67,20 +62,15 @@ cron.schedule('* * * * *', async () => {
 
         const medicineLog = await db.medicine_logs.create({ medicine_id: element.id, log_date: new Date(), log_time: currTime });
 
-        const mailOptions = {
-          from: process.env.your_email,
-          to: user.email,
-          subject: "Reminder for medicine",
-          html: `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${element.name}</strong> medicine <strong>${element.medication_timing}</strong>. because it's <strong>${element.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`
-        }
+        const emailHtml = `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${element.name}</strong> medicine <strong>${element.medication_timing}</strong>. because it's <strong>${element.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`;
 
-        await transporter.sendMail(mailOptions);
+        await sentEmail(user.email, "Reminder for medicine", emailHtml);
 
       }
     });
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 
 });
@@ -116,14 +106,9 @@ cron.schedule('* * * * *', async () => {
 
             const medicineLog = await db.medicine_logs.create({ medicine_id: element.id, log_date: new Date(), log_time: currTime });
 
-            const mailOptions = {
-              from: process.env.your_email,
-              to: user.email,
-              subject: "Reminder for medicine",
-              html: `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${element.name}</strong> medicine <strong>${element.medication_timing}</strong>. because it's <strong>${element.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`
-            }
+            const emailHtml = `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${element.name}</strong> medicine <strong>${element.medication_timing}</strong>. because it's <strong>${element.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`;
 
-            await transporter.sendMail(mailOptions);
+            await sentEmail(user.email, "Reminder for medicine", emailHtml);
 
           }
         }
@@ -131,7 +116,7 @@ cron.schedule('* * * * *', async () => {
     });
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 
 });

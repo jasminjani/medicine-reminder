@@ -1,6 +1,22 @@
 # medicine reminder
 
 
+## redix configuration command : 
+
+:-  run below command into terminals
+
+1. sudo apt install redis-server
+
+2. curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+
+3. sudo chmod 644 /usr/share/keyrings/redis-archive-keyring.gpg
+
+4. echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+
+5. sudo apt-get update
+
+6. sudo apt-get install redis
+
 
 ## Getting started
 

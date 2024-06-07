@@ -94,6 +94,9 @@
     <div class="section">
       <form id="form">
 
+        <input type="hidden" name="type" id="type" value="1">
+        <input type="hidden" name="recurring_type" id="recurring_type" value="daily">
+
         <div class="outer-div">
           <div class="sub-div">
             <p class="p"><label for="name">medicine name : </label></p>
@@ -195,7 +198,7 @@
       const form = document.getElementById('form');
       const formData = new URLSearchParams(new FormData(form));
 
-      let data = await fetch('/add-recurring-daily', {
+      let data = await fetch('/add-medicine', {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
@@ -205,8 +208,9 @@
 
       data = await data.json();
       console.log("recurring daily medicine added");
-      window.location.href = `/dashboard`;
-
+      if (data.success) {
+        window.location.href = `/dashboard`;
+      }
     }
   });
 

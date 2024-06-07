@@ -30,34 +30,6 @@ exports.getOneTimePage = async (req, res) => {
   }
 }
 
-exports.addOneMedicine = async (req, res) => {
-  try {
-
-    const { name, medication_timing, date, time, description } = req.body;
-    const u_id = req.user.id;
-
-    if (!name || !date || !time) {
-      return res.status(500).json({
-        success: false,
-        message: "data missing for add one time medicine"
-      })
-    }
-
-    const dt = new Date(date);
-    const endDt = new Date(new Date(date).setDate(new Date(date).getDate() + 1));
-
-    const addMedicine = await db.medicines.create({ u_id, name, type: 0, medication_timing, start_date: date, end_date: endDt, time, description, day: new Date(date).getDay() })
-
-    res.status(200).send(addMedicine);
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    })
-  }
-}
 
 
 exports.recurringDailyPage = async (req, res) => {
@@ -75,35 +47,6 @@ exports.recurringDailyPage = async (req, res) => {
 }
 
 
-exports.addRecurringDaily = async (req, res) => {
-  try {
-
-    const { name, medication_timing, start_date, end_date, time, description } = req.body;
-    const u_id = req.user.id;
-
-    if (!name || !start_date || !end_date || !time) {
-      return res.status(500).json({
-        success: false,
-        message: "data missing for add recurring daily medicine"
-      })
-    }
-
-    const dt = new Date(end_date);
-    // endDt give result in UTC timezone and every date in database is in UTC.
-    const endDt = new Date(dt.setDate(dt.getDate() + 1));
-
-    const addMedicine = await db.medicines.create({ u_id, name, type: 1, medication_timing, start_date: start_date, end_date: endDt, time, description, recurring_type: 'daily' });
-
-    res.status(200).send(addMedicine);
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    })
-  }
-}
 
 
 exports.recurringWeeklyPage = async (req, res) => {
@@ -121,37 +64,53 @@ exports.recurringWeeklyPage = async (req, res) => {
 }
 
 
-exports.addRecurringWeekly = async (req, res) => {
+exports.addMedicines = async (req, res) => {
   try {
 
-    const { name, medication_timing, start_date, end_date, time, day, description } = req.body;
+    let { name, medication_timing, start_date, end_date, time, day, description, type, recurring_type } = req.body;
     const u_id = req.user.id;
 
-    if (!name || !start_date || !end_date || !time || !day) {
-      return res.status(500).json({
+    if (!name || !start_date || !time || !type) {
+      return res.status(400).json({
         success: false,
-        message: "data missing for add recurring weekly medicine"
+        message: "data missing for add medicine"
       })
     }
 
-    console.log(day.toString());
+    if (type == '1' && (!end_date || !recurring_type || (recurring_type.trim().toLowerCase().toLowe == 'weekly' && !day))) {
+      return res.status(400).json({
+        success: false,
+        message: "data missing for reccuring medicine add"
+      })
+    }
+
+    if (type == '0') {
+      day = new Date(start_date).getDay();
+      end_date = start_date;
+    }
 
     const dt = new Date(end_date);
     // endDt give result in UTC timezone and every date in database is in UTC.
     const endDt = new Date(dt.setDate(dt.getDate() + 1));
 
-    const addMedicine = await db.medicines.create({ u_id, name, type: 1, medication_timing, start_date: start_date, end_date: endDt, time, description, day: day.toString(), recurring_type: 'weekly' });
+    const addMedicine = await db.medicines.create({ u_id, name, type, medication_timing, start_date: start_date, end_date: endDt, time, description, day: day?.toString(), recurring_type });
 
-    res.status(200).send(addMedicine);
+    res.status(200).json({
+      success: true,
+      message: "medicine added successfully"
+    });
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message
     })
   }
 }
+
+
+
 
 
 exports.emailMarkAsDone = async (req, res) => {

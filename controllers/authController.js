@@ -1,4 +1,4 @@
-const transporter = require("../utils/nodemailer");
+const { sentEmail } = require("../helpers/email");
 const db = require("../models");
 // const randomize = require('randomatic');
 const cookieParser = require("cookie-parser");
@@ -75,21 +75,9 @@ exports.newActivationMail = async (req, res) => {
     const userData = await db.users.findAll({ where: { activation_code: activation } });
     const email = userData[0].email;
 
-    const mailOptions = {
-      from: process.env.your_email,
-      to: email,
-      subject: 'sending new link for creating password',
-      html: `<h2>New link for account activation.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${new_activation_code}'>http://localhost:${process.env.port}/password/${new_activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`
-    };
+    const emailHtml = `<h2>New link for account activation.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${new_activation_code}'>http://localhost:${process.env.port}/password/${new_activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
 
-    await transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      }
-      else {
-        console.log("email sent : ", info.response);
-      }
-    });
+    await sentEmail(email, 'sending new link for creating password', emailHtml);
 
     const updateUserActivation = await db.users.update({ activation_code: new_activation_code }, { where: { email: email } });
 
@@ -97,8 +85,8 @@ exports.newActivationMail = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: error.message
     });
   }
@@ -137,23 +125,11 @@ exports.addUser = async (req, res) => {
 
     const newUser = await db.users.create({ first_name, last_name, email, blood_group, phone_no, dob, activation_code })
 
-    const mailOptions = {
-      from: process.env.your_email,
-      to: email,
-      subject: 'sending link for creating password',
-      html: `<h2>congratulations, you have succesefully registered on remindMe platform.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${activation_code}'>http://localhost:${process.env.port}/password/${activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`
-    };
+    const emailHtml = `<h2>congratulations, you have succesefully registered on remindMe platform.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${activation_code}'>http://localhost:${process.env.port}/password/${activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
 
-    await transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      }
-      else {
-        console.log("email sent : ", info.response);
-      }
-    });
+    await sentEmail(email, 'sending link for creating password', emailHtml);
 
-    res.status(200).json({ newUser });
+    res.status(200).json({ success: true, newUser });
 
   } catch (error) {
     console.error(error);
@@ -397,7 +373,7 @@ exports.logoutAllOtherDevices = async (req, res) => {
       message: "All other user Logged out successfully",
     });
   } catch (error) {
-    console.error('Error logging out from other devices: ',error);
+    console.error('Error logging out from other devices: ', error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -413,7 +389,7 @@ exports.getCurrentUser = async (req, res) => {
       user: req.user,
     });
   } catch (error) {
-     console.error(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message,

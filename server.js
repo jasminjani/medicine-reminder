@@ -1,13 +1,14 @@
 const express = require('express');
 const app = express();
+require('dotenv').config();
 const cookieParser = require("cookie-parser");
 const bodyParser = require('body-parser');
 const router = require('./routes/routes');
-require('dotenv').config();
 const port = process.env.port || 3000;
 require('./utils/node-crone');
 require('./utils/report');
 require('./utils/cloudinary')
+require('./utils/bullmq');
 
 
 // passport configuration
