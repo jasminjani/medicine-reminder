@@ -44,7 +44,7 @@ const jobFunction = async (job) => {
 
 
     // after uploading csv file to cloudinary deleting it from server
-    // fs.unlink(csvPath);   // TODO: uncomment this csvfile deleting code
+    fs.unlinkSync(csvPath);
 
     // finding user's name and email 
     const userEmail = await db.users.findOne({ where: { id: job.data.id }, attributes: ['email', 'first_name'], raw: true });

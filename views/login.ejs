@@ -203,35 +203,53 @@
 
   login.addEventListener("click", async (e) => {
     e.preventDefault();
-
-    if (validateLogin()) {
-      const form = document.getElementById('form');
-      const formData = new URLSearchParams(new FormData(form));
-
-      let data = await fetch('/login', {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        method: 'post',
-        body: formData
-      })
-
-      data = await data.json();
-
-      if (data.success) {
-        window.location.href = `/dashboard`;
-      }
-      else {
-        let p = document.createElement("p");
-        document.getElementById('password').insertAdjacentElement("afterend", p);
-        p.innerHTML = `${data.message}`;
-        p.classList.add("validated");
-        p.style.color = "red";
-        p.style.margin = "0";
-        p.style.fontSize = "12px";
-      }
-    }
+    await logincheck();
   });
+
+  login.addEventListener('keyup', async function (e) {
+    try {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        await logincheck();
+      }
+    } catch (error) { console.error(error); }
+  });
+
+  async function logincheck() {
+    try {
+
+      if (validateLogin()) {
+        const form = document.getElementById('form');
+        const formData = new URLSearchParams(new FormData(form));
+
+        let data = await fetch('/login', {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          method: 'post',
+          body: formData
+        })
+
+        data = await data.json();
+
+        if (data.success) {
+          window.location.href = `/dashboard`;
+        }
+        else {
+          let p = document.createElement("p");
+          document.getElementById('password').insertAdjacentElement("afterend", p);
+          p.innerHTML = `${data.message}`;
+          p.classList.add("validated");
+          p.style.color = "red";
+          p.style.margin = "0";
+          p.style.fontSize = "12px";
+        }
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
 </script>
 

@@ -32,7 +32,7 @@ exports.getOneTimePage = async (req, res) => {
 
 
 
-exports.recurringDailyPage = async (req, res) => {
+exports.recurringPage = async (req, res) => {
   try {
 
     res.status(200).render('recurring');
@@ -48,22 +48,6 @@ exports.recurringDailyPage = async (req, res) => {
 
 
 
-
-exports.recurringWeeklyPage = async (req, res) => {
-  try {
-
-    res.status(200).render('recurringWeekly');
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    })
-  }
-}
-
-
 exports.addMedicines = async (req, res) => {
   try {
 
@@ -77,7 +61,7 @@ exports.addMedicines = async (req, res) => {
       })
     }
 
-    if (type == '1' && (!end_date || !recurring_type || (recurring_type.trim().toLowerCase().toLowe == 'weekly' && !day))) {
+    if (type == '1' && (!end_date || !recurring_type || (recurring_type.trim().toLowerCase() == 'weekly' && !day))) {
       return res.status(400).json({
         success: false,
         message: "data missing for reccuring medicine add"
@@ -130,7 +114,7 @@ exports.emailMarkAsDone = async (req, res) => {
     res.status(200).send('this email marked as done');
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message

@@ -184,28 +184,46 @@
 
   addMedicine.addEventListener("click", async (e) => {
     e.preventDefault();
+    await addMedicineFun();
+  });
 
-    if (validate()) {
-      const form = document.getElementById('form');
-      const formData = new URLSearchParams(new FormData(form));
+  addMedicine.addEventListener('keyup', async function (e) {
+    try {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        await addMedicineFun();
+      }
+    } catch (error) { console.error(error); }
+  });
 
-      let data = await fetch('/add-medicine', {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        method: 'post',
-        body: formData
-      })
+  async function addMedicineFun() {
+    try {
 
-      data = await data.json();
-      console.log("one time medicine added");
+      if (validate()) {
+        const form = document.getElementById('form');
+        const formData = new URLSearchParams(new FormData(form));
 
-      if (data.success) {
-        window.location.href = `/dashboard`;
+        let data = await fetch('/add-medicine', {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          method: 'post',
+          body: formData
+        })
+
+        data = await data.json();
+        console.log("one time medicine added");
+
+        if (data.success) {
+          window.location.href = `/dashboard`;
+        }
+
       }
 
+    } catch (error) {
+      console.error(error);
     }
-  });
+  }
 
 </script>
 

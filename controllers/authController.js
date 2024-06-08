@@ -42,6 +42,13 @@ exports.getPasswordPage = async (req, res) => {
 
     const { activation } = req.params;
 
+    if (!activation) {
+      return res.status(400).json({
+        success: false,
+        message: "activation link not found"
+      })
+    }
+
     const linkExpire = await db.users.findAll({ where: { activation_code: activation } });
 
     let diff = new Date(Date.now()) - new Date(linkExpire[0].updatedAt);
@@ -69,17 +76,28 @@ exports.newActivationMail = async (req, res) => {
     // old activation link
     const { activation } = req.params;
 
-    // A string containing a randomly generated, 36 character long v4 UUID.
-    const new_activation_code = crypto.randomUUID();
+    if (!activation) {
+      return res.status(400).json({
+        success: false,
+        message: "activation link not found"
+      })
+    }
 
-    const userData = await db.users.findAll({ where: { activation_code: activation } });
-    const email = userData[0].email;
+    await db.sequelize.transaction(async (t) => {
 
-    const emailHtml = `<h2>New link for account activation.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${new_activation_code}'>http://localhost:${process.env.port}/password/${new_activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
 
-    await sentEmail(email, 'sending new link for creating password', emailHtml);
+      // A string containing a randomly generated, 36 character long v4 UUID.
+      const new_activation_code = crypto.randomUUID();
 
-    const updateUserActivation = await db.users.update({ activation_code: new_activation_code }, { where: { email: email } });
+      const userData = await db.users.findAll({ where: { activation_code: activation } }, { transaction: t });
+      const email = userData[0].email;
+
+      const emailHtml = `<h2>New link for account activation.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${new_activation_code}'>http://localhost:${process.env.port}/password/${new_activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
+
+      await sentEmail(email, 'sending new link for creating password', emailHtml);
+
+      const updateUserActivation = await db.users.update({ activation_code: new_activation_code }, { where: { email: email } }, { transaction: t });
+    })
 
     res.status(200).send("mail sent successfully");
 
@@ -96,38 +114,41 @@ exports.newActivationMail = async (req, res) => {
 exports.addUser = async (req, res) => {
   try {
 
-    const { first_name, last_name, email, blood_group, phone_no, dob } = req.body;
+    await db.sequelize.transaction(async (t) => {
 
-    if (!first_name || !last_name || !email || !phone_no || !dob) {
-      res.status(500).json({
-        success: false,
-        message: "data missing in user creation"
-      })
-    }
+      const { first_name, last_name, email, blood_group, phone_no, dob } = req.body;
 
-    // check that current user is already exist or not
-    const checkSameUser = await db.users.findAll({ where: { email: email } });
+      if (!first_name || !last_name || !email || !phone_no || !dob) {
+        return res.status(400).json({
+          success: false,
+          message: "data missing in user creation"
+        })
+      }
 
-    // if user already exists
-    if (checkSameUser.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exist",
-      });
-    }
+      // check that current user is already exist or not
+      const checkSameUser = await db.users.findAll({ where: { email: email } }, { transaction: t });
 
-
-    // if user not alredy exist
-
-    // A string containing a randomly generated, 36 character long v4 UUID.
-    const activation_code = crypto.randomUUID();
+      // if user already exists
+      if (checkSameUser.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exist",
+        });
+      }
 
 
-    const newUser = await db.users.create({ first_name, last_name, email, blood_group, phone_no, dob, activation_code })
+      // if user not alredy exist
 
-    const emailHtml = `<h2>congratulations, you have succesefully registered on remindMe platform.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${activation_code}'>http://localhost:${process.env.port}/password/${activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
+      // A string containing a randomly generated, 36 character long v4 UUID.
+      const activation_code = crypto.randomUUID();
 
-    await sentEmail(email, 'sending link for creating password', emailHtml);
+
+      const newUser = await db.users.create({ first_name, last_name, email, blood_group, phone_no, dob, activation_code }, { transaction: t })
+
+      const emailHtml = `<h2>congratulations, you have succesefully registered on remindMe platform.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${activation_code}'>http://localhost:${process.env.port}/password/${activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
+
+      await sentEmail(email, 'sending link for creating password', emailHtml);
+    });
 
     res.status(200).json({ success: true, newUser });
 
@@ -147,17 +168,10 @@ exports.addPassword = async (req, res) => {
     const { password } = req.body;
     const { activation } = req.params;
 
-    if (!password) {
-      res.status(500).json({
+    if (!password || !activation) {
+      return res.status(400).json({
         success: false,
-        message: "password not found"
-      })
-    }
-
-    if (!activation) {
-      res.status(500).json({
-        success: false,
-        message: "activation code not found"
+        message: "password or activation not found"
       })
     }
 
@@ -190,116 +204,117 @@ exports.addPassword = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    // get data
-    let { email, password } = req.body;
 
-    // validate data
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
-    // execute the query to find user in DB by email
-    let result;
-    try {
-      result = await db.users.findAll({ where: { email: email, status: 1 } });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-      });
-    }
+    await db.sequelize.transaction(async (t) => {
 
-    // user not found then return res
-    if (result.length <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Incorrect Email or Password",
-      });
-    }
+      // get data
+      let { email, password } = req.body;
 
-    // user found the verify DB password with entered password
-    let hashPassword = result[0].password;
-    if (await bcrypt.compare(password, hashPassword)) {
-      // both are same
-
-      //if db password and user's password matched then put the entry in login_attempts as accept
-
+      // validate data
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
+        });
+      }
+      // execute the query to find user in DB by email
+      let result;
       try {
-
-        await db.login_attemps.create({ u_id: result[0].id, status: true });
-
+        result = await db.users.findAll({ where: { email: email, status: 1 }, raw: true }, { transaction: t });
       } catch (error) {
         return res.status(500).json({
           success: false,
-          error: error.message,
-          message: "Internal Server Error",
+          message: error.message,
         });
       }
 
-
-      // generate token for the cookie
-      let payload = {
-        id: result[0].id,
-        email: result[0].email,
-      };
-
-      // remove password from the user obj
-      let { password: _, createdAt, deletedAt, updatedAt, status, activation_code, ...newObj } = result[0];
-      // generate token
-      let token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-      });
-
-      // set token into userObj
-      newObj.token = token;
-
-
-      // if db password and user's password matched then put the entry in user sessiond with jwt token
-      try {
-
-        await db.user_sessions.create({ u_id: result[0].id, jwt_token: token, ip_address: req.ip });
-
-      } catch (error) {
-        return res.status(500).json({
+      // user not found then return res
+      if (result.length <= 0) {
+        return res.status(400).json({
           success: false,
-          error: error.message,
-          message: "Internal Server Error",
+          message: "Incorrect Email or Password",
         });
       }
 
+      // user found the verify DB password with entered password
+      let hashPassword = result[0].password;
+      if (await bcrypt.compare(password, hashPassword)) {
+        // both are same
+
+        //if db password and user's password matched then put the entry in login_attempts as accept
+
+        try {
+
+          await db.login_attemps.create({ u_id: result[0].id, status: true }, { transaction: t });
+
+        } catch (error) {
+          return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Internal Server Error",
+          });
+        }
 
 
-      return res
-        .cookie("token", token, {
+        // generate token for the cookie
+        let payload = {
+          id: result[0].id,
+          email: result[0].email,
+        };
+
+        // remove password from the user obj
+        let { password, createdAt, deletedAt, updatedAt, ...newObj } = result[0];
+        // generate token
+        let token = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: "1d",
+        });
+
+        // set token into userObj
+        newObj.token = token;
+
+
+        // if db password and user's password matched then put the entry in user sessiond with jwt token
+        try {
+
+          await db.user_sessions.create({ u_id: result[0].id, jwt_token: token, ip_address: req.ip }, { transaction: t });
+
+        } catch (error) {
+          return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Internal Server Error",
+          });
+        }
+
+        return res.cookie("token", token, {
           maxAge: 4 * 24 * 60 * 60 * 1000,
           httpOnly: true,
-        })
-        .json({
+        }).json({
           success: true,
           user: newObj,
         });
-    } else {
-      //if db password and user's password not matched then put the entry in login_attempts as fail
-      try {
+      } else {
+        //if db password and user's password not matched then put the entry in login_attempts as fail
+        try {
 
-        await db.login_attemps.create({ u_id: result[0].id, status: false });
+          await db.login_attemps.create({ u_id: result[0].id, status: false }, { transaction: t });
 
-      } catch (error) {
-        return res.status(500).json({
+        } catch (error) {
+          return res.status(500).json({
+            success: false,
+            error: error.message,
+            message: "Internal Server Error",
+          });
+        }
+
+        //return res for the not match the password with stored password
+        return res.json({
           success: false,
-          error: error.message,
-          message: "Internal Server Error",
+          message: "Incorrect Email or Password",
         });
       }
+    })
 
-      //return res for the not match the password with stored password
-      return res.json({
-        success: false,
-        message: "Incorrect Email or Password",
-      });
-    }
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -340,7 +355,7 @@ exports.logoutAllDevices = async (req, res) => {
     res.clearCookie("token");
     await db.user_sessions.destroy({ where: { u_id: req.user.id } });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "All user Logged out successfully",
     });
@@ -366,9 +381,8 @@ exports.logoutAllOtherDevices = async (req, res) => {
     }
 
     await db.user_sessions.destroy({ where: { [Op.and]: [{ u_id: req.user.id }, { jwt_token: { [Op.ne]: req.token } }] } });
-    console.log("log out from all other devices");
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "All other user Logged out successfully",
     });

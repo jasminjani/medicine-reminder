@@ -32,6 +32,4 @@ app.listen(port, (err) => {
   else {
     console.log(`server connection failed`);
   }
-}
-
-)
+});
