@@ -1,0 +1,69 @@
+:root {
+  --light-blue: #27a2e9;
+  --blue: #0969da;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.section {
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 30PX;
+}
+
+.h1 {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.outer-div {
+  display: flex;
+  justify-content: space-around;
+  margin: 25px;
+}
+
+.input {
+  height: 35px;
+  width: 300px;
+  border-radius: 5px;
+}
+
+.p {
+  margin-bottom: 13px;
+}
+
+.textarea {
+  width: 500px;
+  border-radius: 5px;
+}
+
+.add-medicine-btn {
+  margin-top: 40px;
+}
+
+.btn {
+  height: 40px;
+  width: 180px;
+  border-radius: 3px;
+  background-color: var(--light-blue);
+  padding-top: 10px;
+  cursor: pointer;
+  text-align: center;
+  margin: auto;
+}
+
+.btn:hover {
+  color: var(--white);
+  background-color: var(--blue);
+}

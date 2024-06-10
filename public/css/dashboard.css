@@ -1,0 +1,44 @@
+:root {
+  --brown: #e7e7e7;
+  --blue: #0969da;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.all-medicine {
+  margin: 20px 0;
+}
+
+.all-medicine-header{
+  width: 93%;
+  margin: 0 auto;
+}
+
+#medicine-table {
+  border-collapse: collapse;
+  border: 1px solid var(--brown);
+  border-radius: 5px;
+  width: 93%;
+  margin: 15px auto;
+}
+
+
+td {
+  text-align: center;
+  padding: 8px 0;
+}
+
+th {
+  box-shadow: 0 2px var(--blue);
+  padding: 10px 0;
+  text-align: center;
+}

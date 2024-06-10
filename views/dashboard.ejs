@@ -5,58 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
-  <style>
-    :root {
-      --light-blue: #d2ebf9;
-      --brown: #e7e7e7;
-      --blue: #0969da;
-      --white: #ffffff;
-      --black: black;
-      --darkblue: darkblue;
-      --red: red;
-      --light-red: rgb(255, 128, 128);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-
-    .all-medicine {
-      margin: 20px 0;
-    }
-
-    .all-medicine-header{
-      width: 93%;
-      margin: 0 auto;
-    }
-
-    #medicine-table {
-      border-collapse: collapse;
-      border: 1px solid var(--brown);
-      border-radius: 5px;
-      width: 93%;
-      margin: 15px auto;
-    }
-
-
-    td {
-      text-align: center;
-      padding: 8px 0;
-    }
-
-    th {
-      box-shadow: 0 2px var(--blue);
-      padding: 10px 0;
-      text-align: center;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 
 <body onload="medicineData()">
@@ -95,39 +44,6 @@
 
 </body>
 
-<script>
-
-  async function medicineData() {
-
-    let medicineData = await fetch('/dashboard-data');
-    medicineData = await medicineData.json();
-
-    if (medicineData.length < 1) {
-      document.getElementById('tbody').innerHTML = `<tr><td colspan="6">No data found</td></tr>`;
-    } else {
-
-      medicineData.forEach((medicine, index) => {
-        if (medicine.recurring_type == null) {
-          medicine.recurring_type = "One time"
-          medicine.end_date = '-'
-        }
-
-        let html = `<tr>
-                    <td>${++index}</td>
-                    <td>${medicine.name}</td>
-                    <td>${medicine.start_date.slice(0, 10)}</td>
-                    <td>${medicine.end_date.slice(0, 10)}</td>
-                    <td>${medicine.time}</td>
-                    <td>${medicine.recurring_type}</td>
-                  </tr>`;
-
-        document.getElementById('tbody').innerHTML += html;
-      });
-    }
-
-  }
-
-  
-</script>
+<script src="/javascript/dashboard.js"></script>
 
 </html>
