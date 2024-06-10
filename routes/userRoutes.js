@@ -1,5 +1,5 @@
 const passport = require("passport");
-const { getDashboard, emailMarkAsDone, getOneTimePage, addMedicines, recurringPage } = require("../controllers/userController");
+const { getDashboard, emailMarkAsDone, getOneTimePage, addMedicines, recurringPage, dashboardData, getHistoryPage, getHistoryData, getParticularMedicineHistoryData } = require("../controllers/userController");
 const router = require('express').Router();
 
 router.use(
@@ -9,6 +9,7 @@ router.use(
 // ===== USER CONTROLLER =====
 
 router.route('/dashboard').get(getDashboard);
+router.route('/dashboard-data').get(dashboardData);
 
 router.route('/one-time').get(getOneTimePage);
 router.route('/recurring').get(recurringPage);
@@ -16,6 +17,11 @@ router.route('/add-medicine').post(addMedicines);
 
 
 router.route('/mark-done/:id').get(emailMarkAsDone);
+
+
+router.route('/history').get(getHistoryPage);
+router.route('/get-history-data').get(getHistoryData);
+router.route('/particular-history').post(getParticularMedicineHistoryData);
 
 
 module.exports = router;

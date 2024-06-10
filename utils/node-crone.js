@@ -2,7 +2,23 @@ const cron = require('node-cron');
 const db = require('../models');
 const { Op } = require("sequelize");
 const { sentEmail } = require('../helpers/email');
+const { redisOptions, croneJobQueue } = require('./bullmq');
+const { Worker } = require('bullmq');
 require('dotenv').config();
+
+
+const notificationFunction = async (job) => {
+  try {
+
+    await sentEmail(job.data.email, job.data.subject, job.data.emailHtml);
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// creating worker for doing task which is in queue.
+const worker = new Worker('sendNotifiation', notificationFunction, { connection: redisOptions });
 
 
 // Schedule the cron job to run every minute
@@ -61,7 +77,7 @@ const sendMedicineReminderEmail = async (medicine, currTime) => {
 
     const emailHtml = `<h2>Hey ${user.first_name}, Reminder for taking your medicine.</h2><p>it's time to take your <strong>${medicine.name}</strong> medicine <strong>${medicine.medication_timing}</strong>. because it's <strong>${medicine.time}</strong>.</p><p>Without forgottting take your medicine.</p><a href='http://localhost:${process.env.port}/mark-done/${medicineLog.id}'">Mark as done</a>`;
 
-    await sentEmail(user.email, "Reminder for medicine", emailHtml);
+    croneJobQueue.add('medicineReminder', { email: user.email, subject: "Reminder for medicine", emailHtml: emailHtml });
 
   } catch (error) {
     console.error(error);

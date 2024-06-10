@@ -7,4 +7,6 @@ const redisOptions = {
 
 const queue = new Queue('sendReport', { connection: redisOptions });
 
-module.exports = { redisOptions, queue };
+const croneJobQueue = new Queue('sendNotifiation', { connection: redisOptions });
+
+module.exports = { redisOptions, queue,croneJobQueue };

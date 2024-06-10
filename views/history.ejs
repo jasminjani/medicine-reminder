@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>meidcine history</title>
+  <style>
+    :root {
+      --light-blue: #d2ebf9;
+      --brown: #e7e7e7;
+      --blue: #0969da;
+      --white: #ffffff;
+      --black: black;
+      --darkblue: darkblue;
+      --red: red;
+      --light-red: rgb(255, 128, 128);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .all-medicine {
+      margin: 20px 0;
+    }
+
+    .all-medicine-header {
+      width: 93%;
+      margin: 0 auto;
+    }
+
+    #medicine-table {
+      border-collapse: collapse;
+      border: 1px solid var(--brown);
+      border-radius: 5px;
+      width: 93%;
+      margin: 15px auto;
+    }
+
+
+    td {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    th {
+      box-shadow: 0 2px var(--blue);
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    .details-btn {
+      height: 33px;
+      width: 100px;
+      border-radius: 3px;
+      background-color: var(--light-blue);
+      padding-top: 8px;
+      cursor: pointer;
+      text-align: center;
+      margin: auto;
+    }
+
+    .details-btn:hover {
+      color: var(--white);
+      background-color: var(--blue);
+    }
+
+    /* POPUP CSS */
+
+    .popup {
+      display: none;
+      position: fixed;
+      padding: 10px;
+      left: 20%;
+      right: 20%;
+      margin-left: -150px;
+      top: 30%;
+      margin-top: -100px;
+      background: var(--white);
+      z-index: 20;
+    }
+
+    #popup:after {
+      position: fixed;
+      content: "";
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -2;
+    }
+
+    #popup:before {
+      position: absolute;
+      content: "";
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: var(--white);
+      z-index: -1;
+    }
+
+    .medicine-name-section {
+      margin: 35px auto;
+      display: flex;
+      padding: 35px;
+      border-radius: 25px;
+      background-color: var(--light-blue);
+    }
+
+    h2 {
+      padding-bottom: 8px;
+    }
+
+    .medicine-card {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .medicine-card>h3 {
+      text-align: center;
+      padding-bottom: 8px;
+      color: var(--darkblue);
+    }
+
+    .medicine-detail {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .medicine-more-detail>p,
+    .description>p {
+      margin: 10px 0;
+    }
+
+    .bold-text {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body onload="medicineData()">
+
+  <div class="container">
+    <%- include('./navbar.ejs') %>
+
+      <div class="section">
+
+        <div class="all-medicine">
+          <div class="all-medicine-header">
+            <h2>Medicine history</h2>
+          </div>
+
+          <div class="medicine-table">
+            <table id="medicine-table">
+              <tr>
+                <th>Sr no.</th>
+                <th>medicine name</th>
+                <th>start date</th>
+                <th>end date</th>
+                <th>time</th>
+                <th>Details</th>
+              </tr>
+
+              <tbody id="tbody">
+
+              </tbody>
+
+            </table>
+            <div class="popup" id="popup">
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+</body>
+
+<script>
+
+  async function medicineData() {
+
+    let medicineData = await fetch('/get-history-data');
+    medicineData = await medicineData.json();
+
+    if (medicineData.length < 1) {
+      document.getElementById('tbody').innerHTML = `<tr><td colspan="6">No data found</td></tr>`;
+    } else {
+
+      medicineData.forEach((medicine, index) => {
+        if (medicine.recurring_type == null) {
+          medicine.recurring_type = "One time"
+          medicine.end_date = '-';
+        }
+
+        let html = `<tr>
+                    <td>${++index}</td>
+                    <td>${medicine.name}</td>
+                    <td>${medicine.start_date.slice(0, 10)}</td>
+                    <td>${medicine.end_date.slice(0, 10)}</td>
+                    <td>${medicine.time}</td>
+                    <td>
+                      <p onclick="show('popup', '${medicine.id}')" class="details-btn">Detail</p>
+                    </td>
+                  </tr>`;
+
+        document.getElementById('tbody').innerHTML += html;
+      });
+    }
+
+  }
+
+
+  // ===== GETTING ID OF POPUP =====
+  funcId = function (id) {
+    try {
+      return document.getElementById(id);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // ===== SHOW POPUP FUNCTION =====
+  let show = async function (id, medicine_id) {
+    try {
+      console.log("object");
+      const url = `/particular-history`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({ medicine_id: medicine_id }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      const result = await response.json();
+      console.log(result);
+      let html;
+      if (result.length < 1) {
+        html = `<div class="medicine-name-section">
+                <div class="medicine-card">
+                  <h3> Data Not Found !! </h3>
+                </div>
+              </div>
+              <p class="details-btn" onclick="hide('popup')"> Close </p>`;
+
+      } else {
+
+        if (result.recurring_type == null) {
+          result.recurring_type = "One time"
+          result.end_date = '-';
+        }
+        let days = [];
+        if (result.day == null) {
+          days.push('-');
+        }
+        else {
+          result.day.split(',').forEach((day) => {
+            if (day == '0') { days.push(' sunday') }
+            if (day == '1') { days.push(' monday') }
+            if (day == '2') { days.push(' tuesday') }
+            if (day == '3') { days.push(' wednesday') }
+            if (day == '4') { days.push(' thursday') }
+            if (day == '5') { days.push(' friday') }
+            if (day == '6') { days.push(' saturday') }
+          })
+        }
+        console.log(days);
+
+        html = `<div class="medicine-name-section">
+              <div class="medicine-card">
+                <h3> ${result.name}
+                </h3>
+                <div class="medicine-detail">
+                  <div class="medicine-more-detail">
+                    <p><span class="bold-text">Start Date :</span>
+                      ${result.start_date.slice(0, 10)}
+                    </p>
+                    <p><span class="bold-text">End Date :</span>
+                      ${result.end_date.slice(0, 10)}
+                    </p>
+                    <p><span class="bold-text">Day :</span>
+                      ${days}
+                    </p>
+                  </div>
+                  <div class="medicine-more-detail">
+                    <p><span class="bold-text">Time :</span>
+                      ${result.time}
+                    </p>
+                    <p><span class="bold-text">schedule :</span>
+                      ${result.medication_timing}
+                    </p>
+                    <p><span class="bold-text">Type :</span>
+                      ${result.recurring_type}
+                    </p>
+                  </div>
+                </div>
+                <div class="description">
+                  <p><span class="bold-text">Description :</span>
+                    ${result.description ?? "<span style='color:red'>No Data Found</span>"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p class="details-btn" onclick="hide('popup')"> Close </p>`;
+      }
+
+      funcId(id).innerHTML = html;
+      funcId(id).style.display = 'block';
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  // ===== HIDE POPUP FUNCTION =====
+  let hide = function (id) {
+    try {
+      funcId(id).style.display = 'none';
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+</script>
+
+</html>

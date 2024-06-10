@@ -1,0 +1,136 @@
+<style>
+  :root {
+    --light-blue: #d2ebf9;
+    --brown: #e7e7e7;
+    --blue: #0969da;
+    --white: #ffffff;
+    --black: black;
+    --darkblue: darkblue;
+    --red: red;
+    --light-red: rgb(255, 128, 128);
+  }
+
+  .header {
+    background-color: var(--light-blue);
+    height: 50px;
+    padding: 15px 0;
+  }
+
+  .nav {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .ul {
+    display: flex;
+  }
+
+  li {
+    list-style: none;
+    padding: 0 15px;
+  }
+
+  li,
+  li p {
+    text-decoration: none;
+    color: var(--darkblue);
+    cursor: pointer;
+  }
+
+  .add-medicine-toggle {
+    display: none;
+  }
+
+  #nested-addMedicine,
+  #nested-Logout {
+    background-color: var(--brown);
+    margin-top: 10px;
+    border-radius: 5px;
+  }
+
+  .nav-type {
+    padding: 5px 5px;
+    /* text-align: center; */
+    cursor: pointer;
+    position: relative;
+    z-index: 100;
+  }
+
+  .nav-type:hover {
+    background-color: var(--blue);
+    color: var(--white);
+  }
+</style>
+<header class="header">
+  <nav class="nav">
+    <div class="logo">
+      <img style="width: 50px; height: 50px; margin-top: -15px ;" src="/assets/remindMe_logo.jpg" alt="logo">
+    </div>
+    <ul class="ul">
+      <li onclick="window.location.href=`/dashboard`">Dashboard</li>
+      <li id="nav-addMedicine">
+        <p onclick="navMedicineAdd()">Add Medicine</p>
+        <ul id="nested-addMedicine">
+          <li class="nav-type" onclick="window.location.href=`/one-time`">One time</li>
+          <li class="nav-type" onclick="window.location.href=`/recurring`">Recurring</li>
+        </ul>
+      </li>
+      <li id="Scheduled Sessions" onclick="window.location.href=`/history`">History</li>
+      <li id="Scheduled Sessions">
+        <p onclick="navLogout()">Logout</p>
+        <ul id="nested-Logout">
+          <li class="nav-type" onclick="logout(event,'Logout')">Logout</li>
+          <li class="nav-type" onclick="logout(event,'LogoutAll')">from all</li>
+          <li class="nav-type" onclick="logout(event,'LogoutAllOther')">from other</li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+
+  document.getElementById('nested-addMedicine').classList.add('add-medicine-toggle');
+  document.getElementById('nested-Logout').classList.add('add-medicine-toggle');
+
+  async function navMedicineAdd() {
+    document.getElementById('nested-addMedicine').classList.toggle('add-medicine-toggle');
+  }
+
+  async function navLogout() {
+    document.getElementById('nested-Logout').classList.toggle('add-medicine-toggle');
+  }
+
+  async function logout(e, LogoutValue) {
+    e.preventDefault();
+
+    let url;
+
+    if (LogoutValue == 'Logout') {
+      url = "/logout";
+    }
+    else if (LogoutValue == 'LogoutAll') {
+      url = "/logout-all";
+    }
+    else if (LogoutValue == 'LogoutAllOther') {
+      url = "/logout-all-other";
+    }
+
+    let data = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
+    data = await data.json();
+
+    console.log(data.message);
+
+    if (data.success && (LogoutValue == 'Logout' || LogoutValue == 'LogoutAll')) {
+      window.location = "/login"
+    }
+  }
+
+
+</script>

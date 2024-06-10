@@ -39,7 +39,7 @@
     .h1 {
       display: flex;
       justify-content: center;
-      margin-top: 50px;
+      margin-top: 25px;
     }
 
     .outer-div {
@@ -64,7 +64,7 @@
     }
 
     .add-medicine-btn {
-      margin-top: 60px;
+      margin-top: 40px;
     }
 
     .btn {
@@ -88,55 +88,58 @@
 <body>
 
   <div class="container">
-    <div class="h1">
-      <h1>One time only</h1>
-    </div>
-    <div class="section">
-      <form id="form">
+    <%- include('./navbar.ejs') %>
 
-        <input type="hidden" name="type" id="type" value="0">
+      <div class="h1">
+        <h1>One time only</h1>
+      </div>
+      <div class="section">
+        <form id="form">
 
-        <div class="outer-div">
-          <div class="sub-div">
-            <p class="p"><label for="name">medicine name : </label></p>
-            <input type="text" class="input validateInput" name="name" id="name" tabindex="1"
-              placeholder="      medicine name">
+          <input type="hidden" name="type" id="type" value="0">
+
+          <div class="outer-div">
+            <div class="sub-div">
+              <p class="p"><label for="name">medicine name : </label></p>
+              <input type="text" class="input validateInput" name="name" id="name" tabindex="1"
+                placeholder="      medicine name">
+            </div>
+
+            <div class="sub-div">
+              <p class="p"><label for="medication_timing">medicine schedule : </label></p>
+              <input type="text" class="input" name="medication_timing" id="medication_timing" tabindex="2"
+                placeholder="      eg. before lunch">
+            </div>
           </div>
 
-          <div class="sub-div">
-            <p class="p"><label for="medication_timing">medicine schedule : </label></p>
-            <input type="text" class="input" name="medication_timing" id="medication_timing" tabindex="2"
-              placeholder="      eg. before lunch">
+          <div class="outer-div">
+            <div class="sub-div">
+              <p class="p"><label for="start_date">Date : </label></p>
+              <input type="date" class="input validateInput" name="start_date" id="start_date" tabindex="3"
+                placeholder="      medicine date">
+            </div>
+
+            <div class="sub-div">
+              <p class="p"><label for="time">Time : </label></p>
+              <input type="time" class="input validateInput" name="time" id="time" tabindex="4"
+                placeholder="      medicine time">
+            </div>
           </div>
-        </div>
 
-        <div class="outer-div">
-          <div class="sub-div">
-            <p class="p"><label for="start_date">Date : </label></p>
-            <input type="date" class="input validateInput" name="start_date" id="start_date" tabindex="3"
-              placeholder="      medicine date">
+          <div class="outer-div">
+            <div class="sub-div">
+              <p class="p"><label for="description">Description : </label></p>
+              <textarea class="textarea" name="description" id="description" tabindex="5" cols="30"
+                rows="10"></textarea>
+            </div>
           </div>
 
-          <div class="sub-div">
-            <p class="p"><label for="time">Time : </label></p>
-            <input type="time" class="input validateInput" name="time" id="time" tabindex="4"
-              placeholder="      medicine time">
+          <div class="add-medicine-btn">
+            <p class="btn p" id="addMedicine" tabindex="6">Add Medicine</p>
           </div>
-        </div>
 
-        <div class="outer-div">
-          <div class="sub-div">
-            <p class="p"><label for="description">Description : </label></p>
-            <textarea class="textarea" name="description" id="description" tabindex="5" cols="30" rows="10"></textarea>
-          </div>
-        </div>
-
-        <div class="add-medicine-btn">
-          <p class="btn p" id="addMedicine" tabindex="6">Add Medicine</p>
-        </div>
-
-      </form>
-    </div>
+        </form>
+      </div>
   </div>
 
 </body>

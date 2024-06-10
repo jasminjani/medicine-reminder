@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <style>
+    :root {
+      --light-blue: #d2ebf9;
+      --brown: #e7e7e7;
+      --blue: #0969da;
+      --white: #ffffff;
+      --black: black;
+      --darkblue: darkblue;
+      --red: red;
+      --light-red: rgb(255, 128, 128);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,44 +26,70 @@
     .container {
       max-width: 1300px;
       margin: 0 auto;
-      /* border: 2px solid red; */
     }
 
-    .section {
-      width: 100%;
+    .all-medicine {
+      margin: 20px 0;
+    }
+
+    .all-medicine-header{
+      width: 93%;
       margin: 0 auto;
-      margin-top: 30PX;
-      /* border: 2px solid blue; */
-      display: flex;
-      justify-content: space-around;
     }
 
-    .add-medicine {
-      cursor: pointer;
-      margin: 10px auto;
+    #medicine-table {
+      border-collapse: collapse;
+      border: 1px solid var(--brown);
+      border-radius: 5px;
+      width: 93%;
+      margin: 15px auto;
     }
 
-    .logout {
-      cursor: pointer;
-      margin: 10px auto;
+
+    td {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    th {
+      box-shadow: 0 2px var(--blue);
+      padding: 10px 0;
+      text-align: center;
     }
   </style>
 </head>
 
-<body>
+<body onload="medicineData()">
 
   <div class="container">
+    <%- include('./navbar.ejs') %>
+
     <div class="section">
-      <div class="medicine">
-        <p class="add-medicine" onclick="window.location.href=`/one-time`">One time</p>
-        <p class="add-medicine" onclick="window.location.href=`/recurring`">Recurring</p>
+
+      <div class="all-medicine">
+        <div class="all-medicine-header">
+          <h2>Ongoing medicine</h2>
+        </div>
+
+        <div class="medicine-table">
+          <table id="medicine-table">
+            <tr>
+              <th>Sr no.</th>
+              <th>medicine name</th>
+              <th>start date</th>
+              <th>end date</th>
+              <th>time</th>
+              <th>type</th>
+            </tr>
+
+            <tbody id="tbody">
+
+            </tbody>
+
+          </table>
+        </div>
       </div>
 
-      <div>
-        <p class="logout" onclick="logout(event,'Logout')">Logout</p>
-        <p class="logout" onclick="logout(event,'LogoutAll')">Logout from all divices</p>
-        <p class="logout" onclick="logout(event,'LogoutAllOther')">Logout from other devices</p>
-      </div>
     </div>
   </div>
 
@@ -60,37 +97,37 @@
 
 <script>
 
-  async function logout(e, LogoutValue) {
-    e.preventDefault();
+  async function medicineData() {
 
-    let url;
+    let medicineData = await fetch('/dashboard-data');
+    medicineData = await medicineData.json();
 
-    if (LogoutValue == 'Logout') {
-      url = "/logout";
+    if (medicineData.length < 1) {
+      document.getElementById('tbody').innerHTML = `<tr><td colspan="6">No data found</td></tr>`;
+    } else {
+
+      medicineData.forEach((medicine, index) => {
+        if (medicine.recurring_type == null) {
+          medicine.recurring_type = "One time"
+          medicine.end_date = '-'
+        }
+
+        let html = `<tr>
+                    <td>${++index}</td>
+                    <td>${medicine.name}</td>
+                    <td>${medicine.start_date.slice(0, 10)}</td>
+                    <td>${medicine.end_date.slice(0, 10)}</td>
+                    <td>${medicine.time}</td>
+                    <td>${medicine.recurring_type}</td>
+                  </tr>`;
+
+        document.getElementById('tbody').innerHTML += html;
+      });
     }
-    else if (LogoutValue == 'LogoutAll') {
-      url = "/logout-all";
-    }
-    else if (LogoutValue == 'LogoutAllOther') {
-      url = "/logout-all-other";
-    }
 
-    let data = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-
-    data = await data.json();
-
-    console.log(data.message);
-
-    if (data.success && (LogoutValue == 'Logout' || LogoutValue == 'LogoutAll')) {
-      window.location = "/login"
-    }
   }
 
+  
 </script>
 
 </html>

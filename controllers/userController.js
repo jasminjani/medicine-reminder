@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const db = require("../models");
 require('dotenv').config();
 
@@ -7,8 +8,32 @@ exports.getDashboard = async (req, res) => {
     res.status(200).render('dashboard');
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+
+exports.dashboardData = async (req, res) => {
+  try {
+
+    if (!req.user) {
+      return res.status(400).json({
+        success: false,
+        message: "user not found"
+      })
+    }
+
+    const allMedicines = await db.medicines.findAll({ where: { [Op.and]: [{ start_date: { [Op.lte]: new Date() } }, { end_date: { [Op.gte]: new Date() } }, { u_id: req.user.id }] }, raw: true });
+
+    res.status(200).send(allMedicines);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
       success: false,
       message: error.message
     })
@@ -22,7 +47,7 @@ exports.getOneTimePage = async (req, res) => {
     res.status(200).render('oneTime');
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).json({
       success: false,
       message: error.message
@@ -38,7 +63,7 @@ exports.recurringPage = async (req, res) => {
     res.status(200).render('recurring');
 
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
       message: error.message
@@ -121,4 +146,68 @@ exports.emailMarkAsDone = async (req, res) => {
     })
   }
 }
+
+
+exports.getHistoryPage = async (req, res) => {
+  try {
+
+    res.status(200).render('history');
+
+  } catch (error) {
+    console.error(error);
+    res.status(404).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+
+exports.getHistoryData = async (req, res) => {
+  try {
+
+    if (!req.user) {
+      return res.status(400).json({
+        success: false,
+        message: "user not found"
+      })
+    }
+
+    const allMedicines = await db.medicines.findAll({ where: { u_id: req.user.id }, attributes: ['id', 'name', 'start_date', 'end_date', 'time', 'recurring_type'], raw: true });
+
+    res.status(200).send(allMedicines);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
+
+exports.getParticularMedicineHistoryData = async (req, res) => {
+  try {
+
+    if (!req.body.medicine_id) {
+      return res.status(400).json({
+        success: false,
+        message: "medicine id not found"
+      })
+    }
+
+    const allMedicines = await db.medicines.findOne({ where: { id: req.body.medicine_id }, raw: true });
+
+    res.status(200).send(allMedicines);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
+
 

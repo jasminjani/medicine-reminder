@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 require('dotenv').config();
 const cookieParser = require("cookie-parser");
 const bodyParser = require('body-parser');
@@ -23,7 +24,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.set('view engine', 'ejs');
 
+app.use(express.static(path.join(__dirname, "public")));
+
 app.use(router);
+
 
 app.listen(port, (err) => {
   if (!err) {
