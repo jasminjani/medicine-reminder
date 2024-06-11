@@ -21,7 +21,8 @@ async function medicineData() {
                   <td>${medicine.end_date.slice(0, 10)}</td>
                   <td>${medicine.time}</td>
                   <td>
-                    <p onclick="show('popup', '${medicine.id}')" class="details-btn">Detail</p>
+                    <p onclick="show('popup', '${medicine.id}')" class="details-btn">View</p>
+                    <p onclick="deleteMedicine('${medicine.id}')" class="details-btn">Delete</p>
                   </td>
                 </tr>`;
 
@@ -140,4 +141,38 @@ let hide = function (id) {
   } catch (error) {
     console.error(error);
   }
+}
+
+
+let deleteMedicine = async (medicine_id) => {
+
+  await Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#0969da",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, Delete it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+
+      let response = await fetch(`/delete-medicine`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ medicine_id: medicine_id }),
+      });
+      // let response = await fetch(`/delete-medicine/${medicine_id}`);
+      // response = await response.json();
+
+      if (response.ok) {
+        await Swal.fire({
+          title: "Deleted!",
+          text: "medicine deleted successfully.",
+          icon: "success"
+        });
+        location.reload();
+      }
+    }
+  });
 }

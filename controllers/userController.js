@@ -211,3 +211,29 @@ exports.getParticularMedicineHistoryData = async (req, res) => {
 }
 
 
+exports.deleteMedicine = async (req, res) => {
+  try {
+    const { medicine_id } = req.body;
+
+    if (!medicine_id) {
+      return res.status(400).json({
+        success: false,
+        message: "medicine id not found"
+      })
+    }
+
+    await db.medicines.destroy({ where: { id: medicine_id } });
+
+    res.status(200).json({
+      success: true,
+      message: "medicine deleted successfully"
+    })
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    })
+  }
+}
