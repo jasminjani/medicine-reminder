@@ -89,14 +89,15 @@ exports.newActivationMail = async (req, res) => {
       // A string containing a randomly generated, 36 character long v4 UUID.
       const new_activation_code = crypto.randomUUID();
 
-      const userData = await db.users.findAll({ where: { activation_code: activation } }, { transaction: t });
-      const email = userData[0].email;
+      const userData = await db.users.findOne({ where: { activation_code: activation }, raw: true }, { transaction: t });
+      const email = userData.email;
 
       const emailHtml = `<h2>New link for account activation.</h2><p> click belowe link for creating password and activate your account</p>. <h3><a href='http://localhost:${process.env.port}/password/${new_activation_code}'>http://localhost:${process.env.port}/password/${new_activation_code}</a></h3> <p>HAVE A GOOD DAY :)</p>`;
 
+      const updateUserActivation = await db.users.update({ activation_code: new_activation_code }, { where: { email: email } }, { transaction: t });
+
       await sentEmail(email, 'sending new link for creating password', emailHtml);
 
-      const updateUserActivation = await db.users.update({ activation_code: new_activation_code }, { where: { email: email } }, { transaction: t });
     })
 
     res.status(200).send("mail sent successfully");
@@ -262,7 +263,7 @@ exports.login = async (req, res) => {
           email: result[0].email,
         };
 
-        // remove password from the user obj
+        // remove password and other field from the user obj
         let { password, createdAt, deletedAt, updatedAt, ...newObj } = result[0];
         // generate token
         let token = jwt.sign(payload, process.env.JWT_SECRET, {

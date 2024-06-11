@@ -8,8 +8,8 @@ const router = require('./routes/routes');
 const port = process.env.port || 3000;
 require('./utils/node-crone');
 require('./utils/report');
-require('./utils/cloudinary')
-require('./utils/bullmq');
+// require('./utils/cloudinary')
+// require('./utils/bullmq');
 
 
 // passport configuration

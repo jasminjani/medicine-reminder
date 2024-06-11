@@ -20,10 +20,10 @@ fs
   .readdirSync(__dirname)
   .filter(file => {
     return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
+      file.indexOf('.') !== 0 &&   // this will check anyfile name is not like '.js' file in this(models) folder 
+      file !== basename &&    // this will ensure that file name should not equal to 'index.js'(basename) in this folder
+      file.slice(-3) === '.js' &&   // this will ensure that extension of file should be '.js' in this folder
+      file.indexOf('.test.js') === -1    // file name should not contain '.test.js' 
     );
   })
   .forEach(file => {
