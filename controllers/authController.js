@@ -151,7 +151,7 @@ exports.addUser = async (req, res) => {
       await sentEmail(email, 'sending link for creating password', emailHtml);
     });
 
-    res.status(200).json({ success: true, newUser });
+    res.status(200).json({ success: true, message: "user register successfully" });
 
   } catch (error) {
     console.error(error);
